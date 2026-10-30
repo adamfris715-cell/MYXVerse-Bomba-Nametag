@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bomba Nametag</title>
+<style>
+  :root{
+    --grad:linear-gradient(90deg,#e4161b 0%,#a30d12 55%,#1a0305 100%);
+    --red:#c4121a;
+    --ink:#101014; --ink2:#3a3a44; --mute:#7a7a86; --line:#e8e8ee; --bg:#f3f3f6;
+    --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{min-height:100vh;background:var(--bg);color:var(--ink);font-family:Inter,"Segoe UI",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+
+  .nav{background:#fff;border-bottom:1px solid var(--line);position:relative}
+  .nav::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:var(--grad)}
+  .nav-in{max-width:1000px;margin:0 auto;padding:20px 20px 16px;display:flex;align-items:center;gap:12px}
+  .mark{width:38px;height:38px;border-radius:10px;background:var(--grad);display:grid;place-items:center;color:#fff;font-weight:900;font-size:19px;letter-spacing:-.5px;box-shadow:0 6px 14px rgba(164,13,18,.3)}
+  .brand{line-height:1.15}
+  .brand b{display:block;font-size:17px;font-weight:800;letter-spacing:-.2px}
+  .brand span{font-size:12px;color:var(--mute);font-weight:500}
+
+  .app{max-width:1000px;margin:0 auto;padding:20px 20px 56px;display:grid;gap:16px;grid-template-columns:1fr}
+  @media(min-width:860px){.app{grid-template-columns:1fr 380px;align-items:start}}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(16,16,20,.04),0 10px 30px rgba(16,16,20,.04)}
+  .head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .head h2{margin:0;font-size:13px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--ink2)}
+  .badge{font-size:12px;font-weight:700;color:var(--mute);background:var(--bg);border:1px solid var(--line);padding:4px 9px;border-radius:999px}
+  .body{padding:18px}
+
+  .stage{border-radius:12px;border:1px solid var(--line);overflow:hidden;
+    background:repeating-conic-gradient(#ececf1 0 25%,#fff 0 50%) 0 0/16px 16px}
+  #c{display:block;width:100%;max-width:512px;margin:0 auto;aspect-ratio:1;height:auto;image-rendering:pixelated;image-rendering:crisp-edges}
+
+  .zoomwrap{margin-top:14px}
+  .zl{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
+  .zoom{border-radius:10px;border:1px solid var(--line);padding:10px;
+    background:repeating-conic-gradient(#ececf1 0 25%,#fff 0 50%) 0 0/12px 12px}
+  #z{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges}
+
+  .field + .field{margin-top:22px}
+  .lbl{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px}
+  .lbl b{font-size:13px;font-weight:700;color:var(--ink)}
+  .lbl span{font-size:12px;color:var(--mute);font-weight:600}
+  .inwrap{border-radius:12px;padding:2px;background:var(--line);transition:background .2s}
+  .inwrap:focus-within{background:var(--grad)}
+  #name{display:block;width:100%;border:0;outline:0;border-radius:10px;background:#fff;color:var(--ink);
+    padding:15px 14px;font:800 26px/1 inherit;font-family:inherit;letter-spacing:7px;text-transform:uppercase;text-align:center}
+  #name::placeholder{color:#c8c8d0}
+
+  .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:5px;background:var(--bg);border:1px solid var(--line);border-radius:12px}
+  .tag{padding:11px 4px;border-radius:9px;border:0;background:transparent;color:var(--ink2);
+    font:700 13px inherit;font-family:inherit;letter-spacing:.4px;cursor:pointer;transition:.15s}
+  .tag.on{background:var(--grad);color:#fff;box-shadow:0 5px 12px rgba(164,13,18,.28)}
+
+  .actions{padding:18px;border-top:1px solid var(--line);background:#fcfcfd;border-radius:0 0 var(--r) var(--r)}
+  .go{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:16px;border:0;border-radius:12px;cursor:pointer;
+    font:800 15px inherit;font-family:inherit;letter-spacing:.3px;color:#fff;background:var(--grad);box-shadow:0 10px 22px rgba(164,13,18,.28)}
+  .go:active{transform:scale(.99)}
+  .go svg{width:18px;height:18px}
+  .sub{display:flex;gap:8px;margin-top:10px}
+  .sub button,.sub label{flex:1;padding:11px 8px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink2);
+    font:700 13px inherit;font-family:inherit;text-align:center;cursor:pointer}
+  .sub input{display:none}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);opacity:0;pointer-events:none;
+    background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-size:14px;font-weight:600;transition:.25s}
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <div class="mark">B</div>
+  <div class="brand"><b>Bomba Nametag</b><span>Jabatan Bomba dan Penyelamat Malaysia</span></div>
+</div></div>
+
+<div class="app">
+  <div class="card">
+    <div class="head"><h2>Pratonton</h2><span class="badge" id="size">128 × 128 px</span></div>
+    <div class="body">
+      <div class="stage"><canvas id="c" width="128" height="128"></canvas></div>
+      <div class="zoomwrap">
+        <div class="zl">Zoom</div>
+        <div class="zoom"><canvas id="z"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="head"><h2>Tetapan</h2></div>
+    <div class="body">
+      <div class="field">
+        <div class="lbl"><b>Nama</b><span><span id="n">0</span> / 7</span></div>
+        <div class="inwrap">
+          <input id="name" type="text" maxlength="7" placeholder="NAMA" autocomplete="off" autocapitalize="characters" spellcheck="false" autofocus>
+        </div>
+      </div>
+      <div class="field">
+        <div class="lbl"><b>Tag</b></div>
+        <div class="seg" id="tags"></div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="go" id="dl">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
+        Download PNG
+      </button>
+      <div class="sub">
+        <label>Template<input type="file" id="tpl" accept="image/*"></label>
+        <button id="reset">Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== Template 128x128 — kedudukan diambil terus dari piksel ===== */
+const BASE  = 128;
+const LEFT  = {x:9,  y:34, w:42, h:9};   // kotak nama
+const RIGHT = {x:77, y:34, w:42, h:9};   // kotak tag
+const ZOOM  = {x:5,  y:30, w:118, h:17}; // kawasan zoom
+const BORDER = '#efbb00';
+const FILL   = '#0f0f0f';
+const TEXT   = '#ffc90e';
+const TAGS = ['MALAYSIA','MUST','STORM','PPDA','RIM','EMRS'];
+let tag = TAGS[0];
+
+/* Font piksel: M A L Y S I dari template, huruf lain dalam gaya sama */
+const F = {
+A:'0110,1001,1111,1001,1001', B:'1110,1001,1110,1001,1110',
+C:'0110,1001,1000,1001,0110', D:'1110,1001,1001,1001,1110',
+E:'111,100,110,100,111',      F:'111,100,110,100,100',
+G:'0110,1000,1011,1001,0110', H:'1001,1001,1111,1001,1001',
+I:'111,010,010,010,111',      J:'001,001,001,101,010',
+K:'1001,1010,1100,1010,1001', L:'100,100,100,100,111',
+M:'10001,11011,10101,10001,10001', N:'1001,1101,1011,1001,1001',
+O:'0110,1001,1001,1001,0110', P:'1110,1001,1110,1000,1000',
+Q:'0110,1001,1001,1011,0111', R:'1110,1001,1110,1010,1001',
+S:'111,100,111,001,111',      T:'111,010,010,010,010',
+U:'1001,1001,1001,1001,0110', V:'10001,10001,10001,01010,00100',
+W:'10001,10001,10101,11011,10001', X:'10001,01010,00100,01010,10001',
+Y:'10001,01010,01110,00100,00100', Z:'111,001,010,100,111'
+};
+
+const cv = document.getElementById('c');      // kanvas sebenar (saiz asal template)
+const ctx = cv.getContext('2d');
+const zc = document.getElementById('z');
+const zctx = zc.getContext('2d');
+const input = document.getElementById('name');
+let tplImg = null;
+
+function drawText(text, box){
+  if(!text) return;
+  const glyphs = [...text].map(ch => F[ch].split(','));
+  const widths = glyphs.map(g => g[0].length);
+  const sum = widths.reduce((a, b) => a + b, 0);
+  let gap = 1;
+  let total = sum + (glyphs.length - 1) * gap;
+  if(total > box.w - 4){ gap = 0; total = sum; }
+  let x = box.x + 1 + Math.floor((box.w - 2 - total) / 2);
+  const y = box.y + 2;
+  ctx.fillStyle = TEXT;
+  glyphs.forEach((rows, i) => {
+    rows.forEach((r, ry) => {
+      for(let rx = 0; rx < r.length; rx++){
+        if(r[rx] === '1') ctx.fillRect(x + rx, y + ry, 1, 1);
+      }
+    });
+    x += widths[i] + gap;
+  });
+}
+
+function blackBox(b){
+  ctx.fillStyle = BORDER; ctx.fillRect(b.x, b.y, b.w, b.h);
+  ctx.fillStyle = FILL;   ctx.fillRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
+}
+
+function render(){
+  cv.width  = tplImg ? tplImg.width  : BASE;
+  cv.height = tplImg ? tplImg.height : BASE;
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  if(tplImg) ctx.drawImage(tplImg,0,0);
+  const s = cv.width / BASE;
+  ctx.setTransform(s,0,0,s,0,0);
+  blackBox(LEFT);  drawText(input.value, LEFT);
+  blackBox(RIGHT); drawText(tag, RIGHT);
+  document.getElementById('size').textContent = cv.width + ' × ' + cv.height + ' px';
+
+  const k = 8;
+  zc.width = ZOOM.w * k; zc.height = ZOOM.h * k;
+  zctx.imageSmoothingEnabled = false;
+  zctx.clearRect(0,0,zc.width,zc.height);
+  zctx.drawImage(cv, ZOOM.x*s, ZOOM.y*s, ZOOM.w*s, ZOOM.h*s, 0, 0, zc.width, zc.height);
+}
+
+/* Pilihan tag */
+const tagsEl = document.getElementById('tags');
+TAGS.forEach(t => {
+  const b = document.createElement('button');
+  b.className = 'tag' + (t === tag ? ' on' : '');
+  b.textContent = t;
+  b.onclick = () => {
+    tag = t;
+    [...tagsEl.children].forEach(c => c.classList.toggle('on', c === b));
+    render();
+  };
+  tagsEl.appendChild(b);
+});
+
+input.addEventListener('input', () => {
+  input.value = input.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,7);
+  document.getElementById('n').textContent = input.value.length;
+  render();
+});
+
+/* ===== Download (saiz asal 128x128, lutsinar) ===== */
+const toastEl = document.getElementById('toast');
+function toast(msg){
+  toastEl.textContent = msg; toastEl.classList.add('on');
+  clearTimeout(toast.t); toast.t = setTimeout(() => toastEl.classList.remove('on'), 2000);
+}
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+function plainDownload(blob, fname){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = fname;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  toast('Download dimulakan');
+}
+
+function download(scale){
+  const out = document.createElement('canvas');
+  out.width = cv.width * scale; out.height = cv.height * scale;
+  const o = out.getContext('2d');
+  o.imageSmoothingEnabled = false;
+  o.drawImage(cv, 0, 0, out.width, out.height);
+  const fname = 'bomba-' + (input.value || 'nama').toLowerCase() + (scale > 1 ? '-x' + scale : '') + '.png';
+  out.toBlob(blob => {
+    const file = new File([blob], fname, {type:'image/png'});
+    if(isMobile && navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({files:[file]}).catch(err => {
+        if(err && err.name !== 'AbortError') plainDownload(blob, fname);
+      });
+    } else {
+      plainDownload(blob, fname);
+    }
+  }, 'image/png');
+}
+document.getElementById('dl').onclick  = () => download(1);
+
+document.getElementById('tpl').addEventListener('change', e => {
+  const f = e.target.files[0]; if(!f) return;
+  const img = new Image();
+  img.onload = () => { tplImg = img; render(); };
+  img.src = URL.createObjectURL(f);
+});
+document.getElementById('reset').onclick = () => { tplImg = null; render(); };
+
+render();
+</script>
+</body>
+</html>
